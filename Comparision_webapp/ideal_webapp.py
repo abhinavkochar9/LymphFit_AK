@@ -18,6 +18,33 @@ VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Video
 PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/CleanedData_final"
 MIN_REPS_FOR_ALIGNMENT = 3
 MERGE_BUFFER = 2.0  # seconds between intervals to merge
+LLM_SETTINGS = {
+    "exercise_descriptions": {
+        "DeepBreathing": "Sitting/standing upright, diaphragmatic breathing with ribcage expansion",
+        "ClaspandSpread": "Shoulders relaxed, clasp hands behind back then slowly spread arms wide",
+        "HorizontalPumping": "Arms parallel to ground, alternate forward pushes maintaining shoulder alignment",
+        "OverheadPumping": "Arms fully extended overhead, controlled vertical pumping motion",
+        "PushdownPumping": "Elbows bent at 90°, downward pushing motion focusing on tricep engagement",
+        "ShoulderRoll": "Smooth circular shoulder rotation maintaining neck relaxation"
+    },
+    "joint_priorities": {
+        "DeepBreathing": ["Left Shoulder", "Right Shoulder"],
+        "ClaspandSpread": ["Left Wrist", "Right Wrist", "Left Shoulder", "Right Shoulder"],
+        "HorizontalPumping": ["Left Elbow", "Right Elbow", "Left Shoulder", "Right Shoulder"],
+        "OverheadPumping": ["Left Wrist", "Right Wrist", "Left Shoulder", "Right Shoulder"],
+        "PushdownPumping": ["Left Elbow", "Right Elbow", "Left Wrist", "Right Wrist"],
+        "ShoulderRoll": ["Left Shoulder", "Right Shoulder"]
+    },
+    "exercise_prompts": {
+        "DeepBreathing": "Focus on maintaining symmetrical shoulder position during inhalation/exhalation",
+        "ClaspandSpread": "Ensure smooth scapular movement without hunching shoulders forward",
+        "HorizontalPumping": "Maintain horizontal arm plane and stable core engagement",
+        "OverheadPumping": "Keep wrists aligned over shoulders during vertical motion",
+        "PushdownPumping": "Control elbow extension without locking joints",
+        "ShoulderRoll": "Maintain fluid circular motion without neck compensation"
+    }
+}
+
 KEYPOINT = {
     "indices": [11, 12, 13, 14, 15, 16],
     "names": [
@@ -31,9 +58,9 @@ KEYPOINT = {
 }
 
 FEEDBACK_THRESHOLDS = {
-    "Shoulder": 60,
-    "Elbow": 60,
-    "Wrist": 55
+    "Shoulder": 85,
+    "Elbow": 80,
+    "Wrist": 75
 }
 
 FEEDBACK_PROMPTS = {
@@ -270,7 +297,7 @@ patient = st.sidebar.selectbox("Choose Patient", patients)
 
 deflection_threshold = st.sidebar.slider(
     "Deflection Threshold (%)",
-    min_value=0, max_value=100, value=60, step=1,
+    min_value=0, max_value=100, value=50, step=1,
     help="Any average similarity below this threshold is considered a deflection."
 )
 
