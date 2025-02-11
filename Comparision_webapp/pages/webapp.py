@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 # -----------------------------------------------------------
 
 VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
-PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/CleanedData_final"
+PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
 MIN_REPS_FOR_ALIGNMENT = 3
 MERGE_BUFFER = 2.0  # seconds between intervals to merge
 KEYPOINT = {
@@ -243,7 +243,7 @@ def replay_deflection_interval(ref_data, user_data, alignment_map,
 #             STREAMLIT APPLICATION CODE
 # -----------------------------------------------------------
 
-st.title("Exercise Feedback: Two Graphs, Progress Bar, and Single Timeline")
+st.title("LymphFit Pose Comparision")
 
 # -- Session State --
 if "analysis_data" not in st.session_state:
