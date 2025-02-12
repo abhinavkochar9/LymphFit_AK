@@ -166,7 +166,7 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
             titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
-        height=100,  # Compact graph height
+        height=200,  # Compact graph height
         margin=dict(l=10, r=10, t=30, b=10)  # Compact margins
     )
         acc_placeholder.plotly_chart(acc_fig, use_container_width=True)
@@ -195,7 +195,7 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
             titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
-        height=100,  # Compact graph height
+        height=200,  # Compact graph height
         margin=dict(l=10, r=10, t=30, b=10)  # Compact margins
     )
         gyro_placeholder.plotly_chart(gyro_fig, use_container_width=True)
@@ -226,7 +226,7 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
 
 # Main Visualization Layout
 if video_file_path and json_file_path and csv_file_path:
-    col1, col_video, col2 = st.columns([1, 2, 1])
+    col1, col_video, col2 = st.columns([2, 3, 2])
     
     with col_video:
         video_placeholder = st.empty()
