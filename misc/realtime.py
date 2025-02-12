@@ -1,184 +1,190 @@
-import os
-import time
-import base64
+import streamlit as st
 import cv2
 import numpy as np
 import mediapipe as mp
-import streamlit as st
-import av
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
+import time
+import os
+from PIL import Image
 
-# ----------------------------
-# STEP 1: Choose the Expert (Reference) Video
-# ----------------------------
+# Initialize MediaPipe components
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
-# Folder where your expert videos are stored.
-VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
+# Constants
+EXERCISES = ["DeepBreathing"]  # Start with one exercise for testing
+REF_VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
+OVERLAY_COLOR = (0, 255, 0)  # Green color for overlay
 
-if not os.path.isdir(VIDEO_DIR):
-    st.error(f"Directory '{VIDEO_DIR}' does not exist. Please create it and add your expert videos (e.g. MP4 files).")
-    st.stop()
+# Force portrait layout
+st.markdown("""
+<style>
+    .main .block-container {
+        max-width: 95%;
+    }
+    .stVideo {
+        border-radius: 20px;
+        padding: 10px;
+    }
+    .stButton>button {
+        width: 100%;
+        height: 3em;
+    }
+    [data-testid="stVerticalBlock"] {
+        gap: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# List available MP4 files in the directory.
-video_files = sorted([f for f in os.listdir(VIDEO_DIR) if f.lower().endswith(".mp4")])
-if not video_files:
-    st.error(f"No MP4 files found in '{VIDEO_DIR}'. Please add at least one expert video.")
-    st.stop()
+def get_video_path(exercise):
+    """Validate and return video path"""
+    video_name = f"{exercise.lower().replace(' ', '_')}.mp4"
+    video_path = os.path.join(REF_VIDEO_DIR, video_name)
+    if not os.path.exists(video_path):
+        st.error(f"Missing video: {video_path}")
+        st.stop()
+    return video_path
 
-# Let the user select one of the available expert videos.
-selected_video = st.sidebar.selectbox("Select Expert (Reference) Video", video_files)
-expert_video_path = os.path.join(VIDEO_DIR, selected_video)
-st.sidebar.write(f"**Selected Expert Video:** {selected_video}")
+def initialize_pose():
+    """Initialize MediaPipe Pose with error handling"""
+    try:
+        return mp_pose.Pose(
+            min_detection_confidence=0.7,
+            min_tracking_confidence=0.7
+        )
+    except Exception as e:
+        st.error(f"Failed to initialize pose detection: {str(e)}")
+        st.stop()
 
-# ----------------------------
-# STEP 2: Compute the Expert Video Pose Outlines
-# ----------------------------
-@st.cache_data(show_spinner=True)
-def compute_expert_outlines(video_path):
-    """
-    Processes the expert video frame-by-frame using MediaPipe Pose to detect keypoints
-    and compute a convex hull outline (the reference pose) for each frame.
+def main():
+    st.title("Lymphatic Coach - Posture Correction System")
     
-    Returns:
-        outlines: A list of numpy arrays (one per frame, or None if no pose is detected)
-        ref_w: Frame width of the expert video
-        ref_h: Frame height of the expert video
-        fps: Frames per second of the expert video
-        total_frames: Total number of frames in the expert video
-    """
-    mp_pose = mp.solutions.pose
+    # Main layout columns
+    col1, col2 = st.columns([1,1], gap="medium")
+    
+    with col1:  # Expert Video Column
+        st.header("Expert Demonstration")
+        exercise = st.selectbox("Select Exercise", EXERCISES)
+        video_path = get_video_path(exercise)
+        
+        # Video player with controlled size
+        st.video(video_path, format="video/mp4", start_time=0)
+
+    with col2:  # Live Session Column
+        st.header("Live Session")
+        
+        # State management
+        if 'session' not in st.session_state:
+            st.session_state.session = {
+                'active': False,
+                'start_time': None,
+                'landmarks': None
+            }
+        
+        # Initialize only once
+        if not st.session_state.session['landmarks']:
+            st.session_state.session['landmarks'] = extract_landmarks(video_path)
+        
+        # Control buttons
+        if not st.session_state.session['active']:
+            if st.button("🚀 Start Exercise", type="primary"):
+                st.session_state.session['active'] = True
+                st.session_state.session['start_time'] = time.time() + 5  # 5s countdown
+                st.rerun()
+        
+        if st.session_state.session['active']:
+            handle_exercise_session()
+
+def handle_exercise_session():
+    """Manage live exercise session"""
+    countdown = st.empty()
+    camera_placeholder = st.empty()
+    feedback = st.empty()
+    
+    # 5-second countdown
+    now = time.time()
+    if now < st.session_state.session['start_time']:
+        remaining = int(st.session_state.session['start_time'] - now)
+        countdown.markdown(f"<h1 style='text-align: center'>⏳ {remaining}</h1>", unsafe_allow_html=True)
+        time.sleep(1)
+        st.rerun()
+    
+    countdown.empty()
+    
+    # Main exercise loop
+    pose = initialize_pose()
+    start_time = st.session_state.session['start_time']
+    
+    while st.session_state.session['active']:
+        img_file = st.camera_input("Align with outline", key="livecam")
+        
+        if not img_file:
+            st.session_state.session['active'] = False
+            st.error("Camera disconnected!")
+            st.stop()
+        
+        frame = Image.open(img_file)
+        frame = cv2.cvtColor(np.array(frame), cv2.COLOR_RGB2BGR)
+        
+        # Get current reference frame
+        elapsed = time.time() - start_time
+        current_frame = int(elapsed * 30)  # 30 FPS
+        
+        if current_frame >= len(st.session_state.session['landmarks']):
+            st.success("✅ Exercise Completed!")
+            st.session_state.session['active'] = False
+            break
+        
+        # Apply overlay
+        ref_landmark = st.session_state.session['landmarks'][current_frame]
+        if ref_landmark:
+            frame = draw_overlay(frame, ref_landmark)
+        
+        # Display
+        camera_placeholder.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 
+                              use_column_width=True)
+        
+        # Basic feedback
+        feedback.markdown("""
+        <div style='text-align: center'>
+            <h3 style='color:green'>Follow the GREEN outline!</h3>
+            <p>Keep your posture aligned</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+def extract_landmarks(video_path):
+    """Extract pose landmarks from reference video"""
     cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    ret, frame = cap.read()
-    if not ret:
-        cap.release()
-        return None, None, None, None, None
-    ref_h, ref_w, _ = frame.shape
-    outlines = []
-    with mp_pose.Pose(
-        static_image_mode=False,
-        model_complexity=2,
-        min_detection_confidence=0.5
-    ) as pose:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = pose.process(image_rgb)
-            if results.pose_landmarks:
-                points = []
-                for lm in results.pose_landmarks.landmark:
-                    x = int(lm.x * ref_w)
-                    y = int(lm.y * ref_h)
-                    points.append([x, y])
-                points = np.array(points)
-                hull = cv2.convexHull(points)
-                outlines.append(hull)
-            else:
-                outlines.append(None)
+    pose = mp_pose.Pose()
+    landmarks = []
+    
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        landmarks.append(results.pose_landmarks)
+    
     cap.release()
-    return outlines, ref_w, ref_h, fps, total_frames
+    return landmarks
 
-st.info("Processing expert video to compute pose outlines...")
-(expert_outlines, ex_ref_w, ex_ref_h, ex_fps, ex_total_frames) = compute_expert_outlines(expert_video_path)
-if expert_outlines is None:
-    st.error("Error processing the expert video. Please check the file and its format.")
-    st.stop()
-else:
-    st.success("Expert video processed successfully!")
-
-# ----------------------------
-# STEP 3: Helper Function to Convert Video to Base64 (for HTML embedding)
-# ----------------------------
-def get_video_base64(video_path):
-    with open(video_path, "rb") as f:
-        video_bytes = f.read()
-    return base64.b64encode(video_bytes).decode()
-
-# ----------------------------
-# STEP 4: Define the Video Processor for the Webcam Feed
-# ----------------------------
-class PoseOverlayProcessor(VideoProcessorBase):
-    def __init__(self, expert_outlines, ex_ref_w, ex_ref_h, ex_fps, ex_total_frames, start_time):
-        self.expert_outlines = expert_outlines
-        self.ex_ref_w = ex_ref_w
-        self.ex_ref_h = ex_ref_h
-        self.ex_fps = ex_fps
-        self.ex_total_frames = ex_total_frames
-        self.start_time = start_time  # Timestamp when the exercise started
-
-    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        img = frame.to_ndarray(format="bgr24")
-        if self.start_time is not None:
-            elapsed = time.time() - self.start_time
-            frame_index = int(elapsed * self.ex_fps) % self.ex_total_frames
-            outline = self.expert_outlines[frame_index]
-            if outline is not None:
-                frame_h, frame_w, _ = img.shape
-                scale_x = frame_w / self.ex_ref_w
-                scale_y = frame_h / self.ex_ref_h
-                scaled_outline = outline.astype(np.float32).copy()
-                scaled_outline[:, 0, 0] *= scale_x
-                scaled_outline[:, 0, 1] *= scale_y
-                scaled_outline = scaled_outline.astype(np.int32)
-                cv2.polylines(img, [scaled_outline], isClosed=True, color=(0, 255, 0), thickness=3)
-        return av.VideoFrame.from_ndarray(img, format="bgr24")
-
-# ----------------------------
-# STEP 5: Build the App Layout
-# ----------------------------
-st.set_page_config(page_title="Real-Time Pose Correction", layout="wide")
-st.title("Real-Time Pose Correction Application")
-
-# Initialize the exercise start time in session state.
-if "start_time" not in st.session_state:
-    st.session_state["start_time"] = None
-
-# Create two columns: left for the expert video, right for your webcam feed.
-col1, col2 = st.columns(2)
-
-# --- Controls ---
-with st.container():
-    start_pressed = st.button("Start Exercise")
-    stop_pressed = st.button("Stop Exercise")
-    if start_pressed:
-        st.session_state["start_time"] = time.time()
-    if stop_pressed:
-        st.session_state["start_time"] = None
-
-# --- Left Column: Expert (Reference) Video ---
-with col1:
-    st.header("Expert Video (Reference)")
-    if st.session_state["start_time"] is not None:
-        # Autoplay the expert video (muted to satisfy browser policies)
-        video_b64 = get_video_base64(expert_video_path)
-        video_html = f"""
-            <video width="100%" controls autoplay muted>
-              <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-        """
-        st.markdown(video_html, unsafe_allow_html=True)
-    else:
-        st.info("Press **Start Exercise** to play the expert video.")
-
-# --- Right Column: Webcam Feed with Dynamic Pose Overlay ---
-with col2:
-    st.header("Webcam Feed (Your View)")
-    if st.session_state["start_time"] is not None:
-        rtc_config = RTCConfiguration(
-            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+def draw_overlay(frame, landmarks):
+    """Draw visible overlay with error handling"""
+    try:
+        overlay = frame.copy()
+        mp_drawing.draw_landmarks(
+            overlay,
+            landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing.DrawingSpec(
+                color=OVERLAY_COLOR, thickness=4, circle_radius=6),
+            connection_drawing_spec=mp_drawing.DrawingSpec(
+                color=OVERLAY_COLOR, thickness=4)
         )
-        webrtc_streamer(
-            key="pose-correction",
-            rtc_configuration=rtc_config,
-            video_processor_factory=lambda: PoseOverlayProcessor(
-                expert_outlines, ex_ref_w, ex_ref_h, ex_fps, ex_total_frames, st.session_state["start_time"]
-            ),
-            media_stream_constraints={"video": True, "audio": False},
-        )
-    else:
-        st.info("Press **Start Exercise** to activate your webcam feed.")
+        return cv2.addWeighted(overlay, 0.7, frame, 0.3, 0)
+    except Exception as e:
+        st.error(f"Overlay error: {str(e)}")
+        return frame
+
+if __name__ == "__main__":
+    main()
