@@ -10,10 +10,12 @@ from scipy.signal import find_peaks
 from fastdtw import fastdtw
 import plotly.graph_objects as go
 
+
+
 # -----------------------------------------------------------
 #                       CONSTANTS
 # -----------------------------------------------------------
-
+st.set_page_config(layout="wide")
 VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
 PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
 MIN_REPS_FOR_ALIGNMENT = 3

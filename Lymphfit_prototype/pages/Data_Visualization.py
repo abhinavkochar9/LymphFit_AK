@@ -8,7 +8,7 @@ import time
 import numpy as np
 
 ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
-
+st.set_page_config(layout="wide")
 st.title("LymphFit Data Visualization")
 
 # Sidebar
@@ -62,7 +62,7 @@ def plot_emg_graph(x, y, title):
         title=dict(text=title, font=dict(size=10)),
         xaxis=dict(title="Time (s)", titlefont=dict(size=8), tickfont=dict(size=7)),
         yaxis=dict(title="EMG (mV)", titlefont=dict(size=8), tickfont=dict(size=7)),
-        height=150,
+        height=200,
         margin=dict(l=30, r=30, t=40, b=30),
     )
     return fig
@@ -117,7 +117,27 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
             break
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        video_placeholder.image(frame, use_column_width=True)
+
+        # Create a 1:1 black background square
+        square_size = 500  # Define a uniform square size
+        background = np.zeros((square_size, square_size, 3), dtype=np.uint8)  # Create a black square
+
+        # Resize the frame while maintaining aspect ratio
+        h, w, _ = frame.shape
+        scale = min(square_size / h, square_size / w)
+        resized_frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+
+        # Convert the frame's color from BGR to RGB
+        #resized_frame_rgb = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+        resized_frame_rgb = resized_frame
+
+        # Center the resized frame on the black square
+        x_offset = (square_size - resized_frame_rgb.shape[1]) // 2
+        y_offset = (square_size - resized_frame_rgb.shape[0]) // 2
+        background[y_offset:y_offset + resized_frame_rgb.shape[0], x_offset:x_offset + resized_frame_rgb.shape[1]] = resized_frame_rgb
+
+        # Display the centered video frame on the black square
+        video_placeholder.image(background, use_column_width=True)
 
         # Update Accelerometer graph
         current_time = frame_idx * duration_per_frame
