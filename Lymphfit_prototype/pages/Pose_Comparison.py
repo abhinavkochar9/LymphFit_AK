@@ -264,10 +264,9 @@ exercise = st.sidebar.selectbox(
 )
 
 st.sidebar.header("Patient Selection")
-patients = [
-    d for d in os.listdir(PATIENT_ROOT)
-    if os.path.isdir(os.path.join(PATIENT_ROOT, d))
-]
+patients = sorted(
+    [d for d in os.listdir(PATIENT_ROOT) if os.path.isdir(os.path.join(PATIENT_ROOT, d))]
+)
 patient = st.sidebar.selectbox("Choose Patient", patients)
 
 deflection_threshold = st.sidebar.slider(

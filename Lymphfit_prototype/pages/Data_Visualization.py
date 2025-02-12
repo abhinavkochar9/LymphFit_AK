@@ -14,7 +14,9 @@ st.title("LymphFit Data Visualization")
 # Sidebar
 st.sidebar.header("Select Patient and Exercise")
 if os.path.exists(ROOT_DIR):
-    patients = [f for f in os.listdir(ROOT_DIR) if os.path.isdir(os.path.join(ROOT_DIR, f))]
+    patients = sorted(
+    [f for f in os.listdir(ROOT_DIR) if os.path.isdir(os.path.join(ROOT_DIR, f))]
+)
     selected_patient = st.sidebar.selectbox("Select Patient", options=patients)
 
     if selected_patient:
