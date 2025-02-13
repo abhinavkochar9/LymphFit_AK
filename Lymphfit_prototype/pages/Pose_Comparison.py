@@ -20,8 +20,8 @@ st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 # VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
 # PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
 
-VIDEO_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Reference_Videos" 
-PATIENT_ROOT = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data"
+VIDEO_DIR = "Reference_Videos" 
+PATIENT_ROOT = "Patient_Data"
 
 
 MIN_REPS_FOR_ALIGNMENT = 3
