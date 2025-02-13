@@ -7,8 +7,14 @@ import plotly.graph_objects as go
 import time
 import numpy as np
 
-ROOT_DIR = "Patient_Data"
-st.set_page_config(layout="wide")
+import plotly
+print(plotly.__version__)
+
+# ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
+
+ROOT_DIR = "Patient_Data" 
+
+st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 st.title("LymphFit Data Visualization")
 
 # Sidebar
@@ -62,8 +68,8 @@ def plot_emg_graph(x, y, title):
     fig.add_trace(go.Scatter(x=x, y=y, mode="lines", line=dict(color="blue")))
     fig.update_layout(
         title=dict(text=title, font=dict(size=10)),
-        xaxis=dict(title="Time (s)", titlefont=dict(size=8), tickfont=dict(size=7)),
-        yaxis=dict(title="EMG (mV)", titlefont=dict(size=8), tickfont=dict(size=7)),
+        xaxis=dict(title="Time (s)", tickfont=dict(size=7)),
+        yaxis=dict(title="EMG (mV)", tickfont=dict(size=7)),
         height=200,
         margin=dict(l=30, r=30, t=40, b=30),
     )
