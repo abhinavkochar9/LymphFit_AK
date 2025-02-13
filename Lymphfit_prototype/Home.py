@@ -22,7 +22,7 @@ if st.session_state.page == "Home":
             st.switch_page("pages/Pose_Comparison.py")
     with col2:
         if st.button("Go to LymphFit Data Visualization"):
-            st.switch_page("pages/Data_Visuslization.py")
+            st.switch_page("pages/Data_Visualization.py")
     with col3:
         if st.button("Go to Real-Time Visualization"):
             st.switch_page("pages/Real-Time_Visualization.py")
