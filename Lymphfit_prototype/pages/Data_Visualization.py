@@ -7,9 +7,12 @@ import plotly.graph_objects as go
 import time
 import numpy as np
 
-ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
+import plotly
+print(plotly.__version__)
 
-# ROOT_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data" 
+# ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
+
+ROOT_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data" 
 
 st.set_page_config(layout="wide")
 st.title("LymphFit Data Visualization")
@@ -65,8 +68,8 @@ def plot_emg_graph(x, y, title):
     fig.add_trace(go.Scatter(x=x, y=y, mode="lines", line=dict(color="blue")))
     fig.update_layout(
         title=dict(text=title, font=dict(size=10)),
-        xaxis=dict(title="Time (s)", titlefont=dict(size=8), tickfont=dict(size=7)),
-        yaxis=dict(title="EMG (mV)", titlefont=dict(size=8), tickfont=dict(size=7)),
+        xaxis=dict(title="Time (s)", tickfont=dict(size=7)),
+        yaxis=dict(title="EMG (mV)", tickfont=dict(size=7)),
         height=200,
         margin=dict(l=30, r=30, t=40, b=30),
     )
@@ -142,7 +145,7 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
         background[y_offset:y_offset + resized_frame_rgb.shape[0], x_offset:x_offset + resized_frame_rgb.shape[1]] = resized_frame_rgb
 
         # Display the centered video frame on the black square
-        video_placeholder.image(background, use_column_width=True)
+        video_placeholder.image(background, use_container_width=True)
 
         # Update Accelerometer graph
         current_time = frame_idx * duration_per_frame
@@ -161,12 +164,12 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
         ),
         xaxis=dict(
             title="Time",
-            titlefont=dict(size=8),  # Reduce x-axis title font size
+            # titlefont=dict(size=8),  # Reduce x-axis title font size
             tickfont=dict(size=7),  # Reduce x-axis tick font size
         ),
         yaxis=dict(
             title="Acceleration",
-            titlefont=dict(size=8),  # Reduce y-axis title font size
+            # titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
         height=200,  # Compact graph height
@@ -190,12 +193,12 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
         ),
         xaxis=dict(
             title="Time",
-            titlefont=dict(size=8),  # Reduce x-axis title font size
+            # titlefont=dict(size=8),  # Reduce x-axis title font size
             tickfont=dict(size=7),  # Reduce x-axis tick font size
         ),
         yaxis=dict(
             title="Angular Velocity",
-            titlefont=dict(size=8),  # Reduce y-axis title font size
+            # titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
         height=200,  # Compact graph height
