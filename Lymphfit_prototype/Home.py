@@ -1,7 +1,8 @@
 import streamlit as st
 
 # Set page title and layout
-st.set_page_config(page_title="LymphFit: Advanced AI for Personalized Lymphatic Exercise Guidance", layout="wide")
+st.set_page_config(page_title="LymphFit: Advanced AI for Personalized Lymphatic Exercise Guidance", 
+                   layout="wide", initial_sidebar_state='expanded')
 
 # Initialize session state for navigation
 if "page" not in st.session_state:

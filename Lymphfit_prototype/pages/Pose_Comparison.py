@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 #                       CONSTANTS
 # -----------------------------------------------------------
 # st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 # VIDEO_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Reference_Videos"
 # PATIENT_ROOT = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
 
@@ -300,6 +301,8 @@ if analyze_button or not data_matches_current(st.session_state["analysis_data"])
 # 1) Process & Align if needed
 if not st.session_state["analysis_done"]:
     if analyze_button:
+        # st.set_page_config(initial_sidebar_state="collapsed")
+        # st.session_state.sidebar_state = 'collapsed'
         # Step A: Locate videos
         ref_candidates = [v for v in ref_videos if exercise in v]
         if not ref_candidates:

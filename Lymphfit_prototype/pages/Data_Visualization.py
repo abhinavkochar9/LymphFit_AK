@@ -14,7 +14,7 @@ print(plotly.__version__)
 
 ROOT_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data" 
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 st.title("LymphFit Data Visualization")
 
 # Sidebar
