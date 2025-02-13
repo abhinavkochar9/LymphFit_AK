@@ -7,9 +7,9 @@ import plotly.graph_objects as go
 import time
 import numpy as np
 
-# ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
+ROOT_DIR = "/Users/abhinavkochar/Desktop/Pose correction webapp/Patient_Data"
 
-ROOT_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data" 
+# ROOT_DIR = r"C:\Users\aha85b\Documents\Github\LymphFit\Patient_Data" 
 
 st.set_page_config(layout="wide")
 st.title("LymphFit Data Visualization")
