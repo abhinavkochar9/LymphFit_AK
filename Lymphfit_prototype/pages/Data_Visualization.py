@@ -164,12 +164,12 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
         ),
         xaxis=dict(
             title="Time",
-            # titlefont=dict(size=8),  # Reduce x-axis title font size
+            titlefont=dict(size=8),  # Reduce x-axis title font size
             tickfont=dict(size=7),  # Reduce x-axis tick font size
         ),
         yaxis=dict(
             title="Acceleration",
-            # titlefont=dict(size=8),  # Reduce y-axis title font size
+            titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
         height=200,  # Compact graph height
@@ -193,12 +193,12 @@ def process_data(video_file_path, json_file_path, csv_file_path, acc_placeholder
         ),
         xaxis=dict(
             title="Time",
-            # titlefont=dict(size=8),  # Reduce x-axis title font size
+            titlefont=dict(size=8),  # Reduce x-axis title font size
             tickfont=dict(size=7),  # Reduce x-axis tick font size
         ),
         yaxis=dict(
             title="Angular Velocity",
-            # titlefont=dict(size=8),  # Reduce y-axis title font size
+            titlefont=dict(size=8),  # Reduce y-axis title font size
             tickfont=dict(size=7),  # Reduce y-axis tick font size
         ),
         height=200,  # Compact graph height
